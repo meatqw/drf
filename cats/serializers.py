@@ -1,3 +1,4 @@
+from email.policy import default
 import io
 
 from rest_framework import serializers
@@ -14,9 +15,11 @@ from .models import Cat
 
 
 class CatSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
     class Meta:
         model = Cat
-        fields = ("name", "content", "breed")
+        fields = ("name", "content", "breed", "user")
         # fields = "__all__"
         
         

@@ -5,33 +5,33 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.forms import model_to_dict
 from rest_framework import mixins
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from .permissions import IsAdminReadOnly, IsOwnerOrReadOnly
 from .models import Cat, Breed
 from .serializers import CatSerializer
 
 
-class CatViewSet(viewsets.ModelViewSet):
-    """
-    CRUD
-    """
-    # queryset = Cat.objects.all()
-    serializer_class = CatSerializer
+# class CatViewSet(viewsets.ModelViewSet):
+#     """
+#     CRUD
+#     """
+#     # queryset = Cat.objects.all()
+#     serializer_class = CatSerializer
     
     
-    def get_queryset(self):
-        pk = self.kwargs.get('pk')
+#     def get_queryset(self):
+#         pk = self.kwargs.get('pk')
         
-        if not pk:
-            return Cat.objects.all()[:3]
-        else:
-            return Cat.objects.filter(pk=pk)
+#         if not pk:
+#             return Cat.objects.all()[:3]
+#         else:
+#             return Cat.objects.filter(pk=pk)
     
-    # new routes
-    @action(methods=['get'], detail=True)
-    def breed(self, request, pk=None):
-        breeds = Breed.objects.get(pk=pk)
-        return Response({"breeds": breeds.name})
-    
+#     # new routes
+#     @action(methods=['get'], detail=True)
+#     def breed(self, request, pk=None):
+#         breeds = Breed.objects.get(pk=pk)
+#         return Response({"breeds": breeds.name})
     
 
 # class CatViewSet(mixins.CreateModelMixin,
@@ -54,20 +54,31 @@ class CatViewSet(viewsets.ModelViewSet):
 #     serializer_class = CatSerializer
     
 
-# class CatAPIList(generics.ListCreateAPIView):
-#     """
-#     GET and POST request
-#     """
-#     queryset = Cat.objects.all()
-#     serializer_class = CatSerializer
-    
-# class CatAPIUpdate(generics.UpdateAPIView):
-#     """
-#     UPDATE request
-#     """
-#     queryset = Cat.objects.all()
-#     serializer_class = CatSerializer
-    
+class CatAPIList(generics.ListCreateAPIView):
+    """
+    GET and POST request
+    """
+    queryset = Cat.objects.all()
+    serializer_class = CatSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+
+class CatAPIUpdate(generics.RetrieveUpdateAPIView):
+    """
+    UPDATE request
+    """
+    queryset = Cat.objects.all()
+    serializer_class = CatSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
+
+
+class CatAPIDestroy(generics.RetrieveDestroyAPIView):
+    """
+    DELETE request
+    """
+    queryset = Cat.objects.all()
+    serializer_class = CatSerializer
+    permission_classes = (IsAdminReadOnly,)
 
 # class CatAPIDetailView(generics.RetrieveUpdateDestroyAPIView):
 #     """
